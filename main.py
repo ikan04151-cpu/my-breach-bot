@@ -1,58 +1,59 @@
 import os
 import telebot
 import requests
+import re
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
+def extract_username_from_tiktok(url):
+    """دالة ذكية لاستخراج اليوزر نيم الحقيقي من روابط تيك توك بجميع أنواعها"""
+    try:
+        # إذا كان الرابط قصير (vt.tiktok.com) نقوم بتتبعه لجلب الرابط الأصلي
+        if "vt.tiktok.com" in url or "vm.tiktok.com" in url:
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+            response = requests.get(url, headers=headers, timeout=5, allow_redirects=True)
+            url = response.url
+        
+        # استخراج اليوزر نيم المسبوق بعلامة @ من الرابط الكامل
+        match = re.search(r'@([a-zA-Z0-9_\.]+)', url)
+        if match:
+            return match.group(1)
+    except Exception:
+        pass
+    return None
+
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     welcome_msg = (
-        "👋 أهلاً بك في بوت التتبع الأمني الشامل المطوّر (OSINT Premier Bot).\n\n"
-        "🔍 **الخصائص والتحقيقات المدعومة حالياً:**\n"
-        "• 🔢 **إرسال رقم هاتف:** لفحص التسريبات وتتبع الحسابات الاجتماعية.\n"
-        "• 👤 **إرسال يوزر نيم:** لتتبع الحساب في كافة المنصات بضغطة واحدة.\n"
-        "• 🖼️ **إرسال صورة (حتى لو بدون علامة مائية):** للبحث العكسي العميق ومعرفة الناشر الأصلي، وتحديد مكان ومصدر التقاط الصورة على الإنترنت!"
+        "👋 أهلاً بك في بوت التتبع الأمني والـ OSINT المتكامل.\n\n"
+        "🔍 **القدرات الذكية المتاحة:**\n"
+        "• 🔢 **إرسال رقم هاتف:** لفحص التسريبات وتوليد روابط المطابقة.\n"
+        "• 👤 **إرسال يوزر نيم:** لتتبع الحساب في المنصات الاجتماعية.\n"
+        "• 🔗 **إرسال رابط تيك توك:** سيقوم البوت تلقائياً باستخراج يوزر صاحب الرابط وفحص كافة حساباته الأخرى وتتبعها!"
     )
     bot.reply_to(message, welcome_msg, parse_mode="Markdown")
-
-# ميزة مطورة: استقبال الصور وعمل بحث عكسي متقاطع لكشف الناشر الأصلي ومكان التصوير
-@bot.message_handler(content_types=['photo'])
-def handle_image_osint(message):
-    try:
-        bot.reply_to(message, "⏳ جاري استقبال الصورة وتحليل البصمة الرقمية العميقة للزوايا والألوان...")
-        
-        # جلب رابط ملف الصورة من خوادم تليجرام لتهيئته للمحركات العالمية
-        file_id = message.photo[-1].file_id
-        file_info = bot.get_file(file_id)
-        file_path = file_info.file_path
-        image_url = f"https://telegram.org{TELEGRAM_TOKEN}/{file_path}"
-        
-        # روابط التحقيق العكسي العالمية المباشرة لكشف هوية ومصدر الصورة
-        tineye_url = f"https://tineye.com{image_url}"
-        google_lens_url = f"https://google.com{image_url}"
-        yandex_url = f"https://yandex.com{image_url}"
-        
-        reply_text = "🖼️ **[ لوحة التحقيق الرقمي وكشف مصدر الصورة ]**\n\n"
-        reply_text += "💡 لكشف الحساب الناشر الأصلي، أو معرفة مكان تصويرها ومطابقتها، اضغط على الروابط الموجهة أدناه:\n\n"
-        reply_text += f"🌐 **1. فحص Google Lens (الأقوى لكشف الحسابات ومطابقة الوجوه والأماكن):**\n{google_lens_url}\n\n"
-        reply_text += f"🔎 **2. فحص Yandex Images (الأدق لكشف صور سناب شات والمقاطع المأخوذة منها):**\n{yandex_url}\n\n"
-        reply_text += f"🔍 **3. فحص TinEye (لمعرفة أول تاريخ ظهرت فيه الصورة على الإنترنت):**\n{tineye_url}\n\n"
-        reply_text += "⚠️ **تنبيه أمني:** تأكد من فتح الروابط في متصفح خارجي (مثل سفاري أو كروم) لتظهر لك قائمة الملفات الشخصية والمواقع التي نشرت الصورة بالتفصيل وبدقة كاملة."
-        
-        bot.reply_to(message, reply_text, parse_mode="Markdown", disable_web_page_preview=True)
-        
-    except Exception as e:
-        bot.reply_to(message, "❌ حدث خطأ أثناء تحليل بصمة الصورة، يرجى المحاولة لاحقاً.")
 
 @bot.message_handler(func=lambda message: True)
 def advanced_osint_tracker(message):
     query = message.text.strip()
-    is_phone = query.isdigit() or (query.startswith('+') and query[1:].isdigit())
     
-    bot.reply_to(message, "🔍 جاري الفحص الرقمي وتحليل الارتباط بالمنصات الاجتماعية...")
+    # 1. فحص إذا كان المستخدم قد أرسل رابط تيك توك
+    if "tiktok.com" in query:
+        bot.reply_to(message, "🔗 تم رصد رابط تيك توك.. جاري فك الرابط واستخراج اسم المستخدم...")
+        extracted_user = extract_username_from_tiktok(query)
+        if extracted_user:
+            query = extracted_user
+            bot.reply_to(message, f"👤 تم استخراج اليوزر بنجاح: `@{query}`\nجاري بدء عملية التتبع المتقاطع...")
+        else:
+            bot.reply_to(message, "❌ لم نتمكن من استخراج اليوزر من الرابط، يرجى إرسال اليوزر نيم مجرداً.")
+            return
+
+    # التحقق برمجياً إذا كانت المدخلات رقم هاتف
+    is_phone = query.isdigit() or (query.startswith('+') and query[1:].isdigit())
     clean_target = query.replace('+', '').replace('@', '')
     
+    # استدعاء خادم الفحص الأمني
     url = f"https://scylla.sh{query}"
     leak_results = []
     social_linked = set()
@@ -80,7 +81,7 @@ def advanced_osint_tracker(message):
     if leak_results:
         reply_text += f"⚠️ **[ Found ! ]** تم العثور على سجلات عامة مرتبطة بالهدف.\n\n"
     else:
-        reply_text += "✅ حالة الهدف: لا توجد تسريبات أمنية عامة ومباشرة للرقم حالياً.\n\n"
+        reply_text += "✅ حالة الهدف: لا توجد تسريبات أمنية عامة ومباشرة للبيانات حالياً.\n\n"
 
     reply_text += "📱 **[ التحقق من ارتباط منصات التواصل الاجتماعي ]**\n"
     if is_phone:
@@ -89,15 +90,16 @@ def advanced_osint_tracker(message):
             for platform in social_linked:
                 reply_text += f" {platform} \n"
         else:
-            reply_text += "ℹ️ لم نجد ارتباطاً مكشوفاً في السجلات، إليك روابط المطابقة والبحث الرقمي:\n"
+            reply_text += "ℹ️ لم نجد ارتباطاً مكشوفاً في السجلات، إليك روابط المطابقة الرقمية:\n"
         
         base_url = "https://tiktok.com"
-        reply_text += f"\n🔗 **روابط تتبع ومطابقة سريعة بالرقم:**\n"
+        reply_text += f"\n🔗 **روابط تتبع سريعة بالرقم:**\n"
         reply_text += f"• تيك توك: {base_url}{clean_target}\n"
         reply_text += f"• فيسبوك: https://facebook.com{clean_target}\n"
         reply_text += f"• منصة 𝕏: https://x.com{clean_target}\n"
     else:
-        reply_text += f"• تيك توك: https://tiktok.com@{clean_target}\n"
+        # اللوحة النظيفة عند إرسال يوزر نيم أو استخراجه من رابط تيك توك
+        reply_text += f"• تيك توك: https://www.tiktok.com/@{clean_target}\n"
         reply_text += f"• سناب شات: https://snapchat.com{clean_target}\n"
         reply_text += f"• انستقرام: https://instagram.com{clean_target}/\n"
         reply_text += f"• تليجرام: https://t.me{clean_target}\n"

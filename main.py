@@ -8,14 +8,14 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "👋 أهلاً بك في بوت فحص التسريبات الذكي والمجاني.\n\nقم بإرسال البريد الإلكتروني أو رقم الهاتف (مثال: 9665xxxxxxxx) للفحص الأمني وتتبع الحسابات.")
+    bot.reply_to(message, "👋 أهلاً بك في بوت فحص التسريبات الذكي والمجاني.\n\nقم بإرسال البريد الإلكتروني أو رقم الهاتف (مثال: 05xxxxxxxx) للفحص الأمني وتتبع الحسابات.")
 
 @bot.message_handler(func=lambda message: True)
 def check_leak_and_social(message):
     query = message.text.strip()
     
-    # التحقق إذا كانت المدخلات رقم هاتف (يحتوي على أرقام فقط وطوله بين 9 إلى 14 خانة)
-    is_phone = re.match(r'^\+?[0-9]{9,14}\$', query)
+    # إصلاح ذكي للتعرف على رقم الهاتف للتأكد من قراءته بشكل صحيح
+    is_phone = query.isdigit() or (query.startswith('+') and query[1:].isdigit())
     
     bot.reply_to(message, "🔍 جاري الفحص الأمني في قواعد البيانات المفتوحة وتتبع الحسابات...")
     
@@ -37,14 +37,13 @@ def check_leak_and_social(message):
                 reply_text += f"🔒 البيانات المتضررة: إيميل / كلمة مرور\n"
                 reply_text += "-------------------------\n"
         else:
-            reply_text += f"✅ الفحص الأمني: لم يتم العثور على تسريبات عامة لهذا الهدف (`{query}`).\n\n"
+            reply_text += f"✅ الفحص الأمني: لا توجد سجلات مسربة حالياً في خادم الفحص السريع.\n\n"
             
     except Exception:
         reply_text += "✅ الفحص الأمني: لا توجد سجلات مسربة حالياً في خادم الفحص السريع.\n\n"
 
-    # 2. شق توليد رابط تتبع تيك توك في حال كان المدخل رقم هاتف
-    if is_phone:
-        # تنظيف الرقم من علامة + إذا وجدت لتهيئة الرابط
+    # 2. شق توليد رابط تتبع تيك توك المصلح
+    if is_phone and len(query) >= 9:
         clean_phone = query.replace('+', '')
         reply_text += "📱 [ تتبع وسائل التواصل الاجتماعي ]\n"
         reply_text += f"🔗 رابط البحث عن الحساب المرتبط في تيك توك:\n"

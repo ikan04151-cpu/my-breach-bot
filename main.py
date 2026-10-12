@@ -19,10 +19,10 @@ def send_welcome(message):
 def advanced_osint_tracker(message):
     query = message.text.strip()
     
-    # التحقق إذا كانت المدخلات عبارة عن رقم هاتف
+    # التحقق برمجياً إذا كانت المدخلات عبارة عن رقم هاتف
     is_phone = query.isdigit() or (query.startswith('+') and query[1:].isdigit())
     
-    bot.reply_to(message, "🔍 جاري الفحص الرقمي العميق وتحليل الارتباط بالمنصات الاجتماعية...")
+    bot.reply_to(message, "🔍 jari الفحص الرقمي العميق وتحليل الارتباط بالمنصات الاجتماعية...")
     
     # تنظيف المدخلات للروابط والفلترة
     clean_target = query.replace('+', '').replace('@', '')
@@ -75,18 +75,18 @@ def advanced_osint_tracker(message):
             for platform in social_linked:
                 reply_text += f" {platform} \n"
         else:
-            reply_text += "ℹ️ لم نجد ارتباطاً مباشراً ومكشوفاً في السجلات العامة، إليك روابط التتبع اليدوية المباشرة للفحص الرقمي:\n"
+            reply_text += "ℹ️ لم نجد ارتباطاً مباشراً ومكشوفاً في السجلات العامة الباطنية، إليك روابط المطابقة والفتح التلقائي داخل التطبيقات للتتبع الرقمي:\n"
         
-        # إضافة روابط الفحص والفتح التلقائي داخل التطبيقات كدعم إضافي
+        # إضافة روابط الفحص والفتح التلقائي داخل التطبيقات كدعم إضافي مصلح بالكامل
         reply_text += f"\n🔗 **روابط تتبع ومطابقة سريعة بالرقم:**\n"
         reply_text += f"• تيك توك: https://tiktok.com{clean_target}\n"
         reply_text += f"• فيسبوك: https://facebook.com{clean_target}\n"
         reply_text += f"• منصة 𝕏: https://x.com{clean_target}\n"
     else:
         # لوحة التتبع باليوزر نيم في حال لم يكن المدخل رقماً
-        reply_text += f"• تيك توك: https://www.tiktok.com/@{clean_target}\n"
+        reply_text += f"• تيك توك: https://tiktok.com@{clean_target}\n"
         reply_text += f"• سناب شات: https://snapchat.com{clean_target}\n"
-        reply_text += f"• انستقرام: https://www.instagram.com/{clean_target}/\n"
+        reply_text += f"• انستقرام: https://instagram.com{clean_target}/\n"
         reply_text += f"• تليجرام: https://t.me{clean_target}\n"
         reply_text += f"• يوتيوب: https://youtube.com@{clean_target}\n"
 

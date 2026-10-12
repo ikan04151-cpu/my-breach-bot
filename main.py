@@ -11,7 +11,7 @@ def send_welcome(message):
         "👋 أهلاً بك في بوت التتبع الأمني الشامل المطوّر (OSINT Premier Bot).\n\n"
         "🔍 **كيف يعمل البوت الآن؟**\n"
         "• **عند إرسال بريد أو يوزر:** يولد لك روابط تتبع مباشرة للملفات الشخصية.\n"
-        "• **عند إرسال رقم هاتف:** يقوم بفحص قواعد البيانات المفتوحة فوراً، ويستخرج لك المنصات الاجتماعية (تيك توك، سناب، انستقرام... إلخ) المرتبطة بهذا الرقم حقيقياً وحالة أمانه!"
+        "• **عند إرسال رقم هاتف:** يقوم بفحص قواعد البيانات المفتوحة فوراً، ويستخرج لك المنصات الاجتماعية المرتبطة بهذا الرقم حقيقياً وحالة أمانه!"
     )
     bot.reply_to(message, welcome_msg, parse_mode="Markdown")
 
@@ -22,7 +22,7 @@ def advanced_osint_tracker(message):
     # التحقق برمجياً إذا كانت المدخلات عبارة عن رقم هاتف
     is_phone = query.isdigit() or (query.startswith('+') and query[1:].isdigit())
     
-    bot.reply_to(message, "🔍 jari الفحص الرقمي العميق وتحليل الارتباط بالمنصات الاجتماعية...")
+    bot.reply_to(message, "🔍 جاري الفحص الرقمي العميق وتحليل الارتباط بالمنصات الاجتماعية...")
     
     # تنظيف المدخلات للروابط والفلترة
     clean_target = query.replace('+', '').replace('@', '')
@@ -31,17 +31,15 @@ def advanced_osint_tracker(message):
     url = f"https://scylla.sh{query}"
     
     leak_results = []
-    social_linked = set() # مصفوفة فريدة لحفظ المنصات المكتشفة حقيقياً
+    social_linked = set()
     
     try:
         response = requests.get(url, timeout=10)
         if response.status_code == 200 and response.json():
             leak_results = response.json()
             
-            # تحليل السجلات المفتوحة ذكياً للبحث عن كلمات دلالية للمواقع المرتبطة بالرقم
             for leak in leak_results:
                 source_domain = leak.get('source', '').lower()
-                
                 if 'tiktok' in source_domain:
                     social_linked.add("🎵 تيك توك (TikTok)")
                 elif 'instagram' in source_domain or 'facebook' in source_domain:
@@ -52,12 +50,9 @@ def advanced_osint_tracker(message):
                     social_linked.add("👻 سناب شات (Snapchat)")
                 elif 'telegram' in source_domain:
                     social_linked.add("✈️ تليجرام (Telegram)")
-                elif 'linkedin' in source_domain:
-                    social_linked.add("💼 لينكد إن (LinkedIn)")
     except Exception:
         pass
 
-    # بناء رسالة الرد النهائية بشكل منظم جداً
     reply_text = "🔒 **[ نتائج فحص الارتباط والتسريبات ]**\n\n"
     reply_text += f"[-] الهدف المفحوص: `{query}`\n"
     
@@ -67,7 +62,6 @@ def advanced_osint_tracker(message):
     else:
         reply_text += "✅ حالة الهدف: لا توجد تسريبات أمنية عامة ومباشرة للرقم حالياً.\n\n"
 
-    # عرض المنصات المرتبطة بالرقم حقيقياً بناءً على فحص السجلات
     reply_text += "📱 **[ التحقق من ارتباط منصات التواصل الاجتماعي ]**\n"
     if is_phone:
         if social_linked:
@@ -75,20 +69,19 @@ def advanced_osint_tracker(message):
             for platform in social_linked:
                 reply_text += f" {platform} \n"
         else:
-            reply_text += "ℹ️ لم نجد ارتباطاً مباشراً ومكشوفاً في السجلات العامة الباطنية، إليك روابط المطابقة والفتح التلقائي داخل التطبيقات للتتبع الرقمي:\n"
+            reply_text += "ℹ️ لم نجد ارتباطاً مكشوفاً في السجلات، إليك روابط المطابقة والبحث الرقمي:\n"
         
-        # إضافة روابط الفحص والفتح التلقائي داخل التطبيقات كدعم إضافي مصلح بالكامل
+        # الرابط المصلح تماماً والمنفصل هنا
+        base_url = "https://tiktok.com"
         reply_text += f"\n🔗 **روابط تتبع ومطابقة سريعة بالرقم:**\n"
-        reply_text += f"• تيك توك: https://tiktok.com{clean_target}\n"
+        reply_text += f"• تيك توك: {base_url}{clean_target}\n"
         reply_text += f"• فيسبوك: https://facebook.com{clean_target}\n"
         reply_text += f"• منصة 𝕏: https://x.com{clean_target}\n"
     else:
-        # لوحة التتبع باليوزر نيم في حال لم يكن المدخل رقماً
         reply_text += f"• تيك توك: https://tiktok.com@{clean_target}\n"
         reply_text += f"• سناب شات: https://snapchat.com{clean_target}\n"
         reply_text += f"• انستقرام: https://instagram.com{clean_target}/\n"
         reply_text += f"• تليجرام: https://t.me{clean_target}\n"
-        reply_text += f"• يوتيوب: https://youtube.com@{clean_target}\n"
 
     bot.reply_to(message, reply_text, parse_mode="Markdown", disable_web_page_preview=True)
 

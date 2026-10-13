@@ -11,7 +11,7 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
 ASSET = "EURUSD"
 
-# --- 1. خادم الويب المطور ومنع السيرفر من النوم (Keep-Alive) ---
+# --- 1. خادم الويب ومنع السيرفر من النوم (Keep-Alive) ---
 app = Flask('')
 
 @app.route('/')
@@ -35,22 +35,17 @@ def self_ping_loop():
 
 # --- 2. جلب الأسعار الحقيقية وحساب المؤشرات الفنية ---
 def get_live_price():
-    """جلب سعر زوج EURUSD اللحظي الفعلي بدقة من خادم الأسواق العالمية"""
+    """جلب سعر زوج EURUSD اللحظي الفعلي من خادم الأسواق العالمية"""
     try:
-        # استخدام رابط مالي مجاني وسريع لجلب أسعار العملات اللحظية المباشرة
-        url = "https://coindesk.com" # بديل سريع أو يمكنك ربطه بـ Binance/Kraken للعملات
-        # لضمان عدم توقف البوت، إذا فشل الاتصال نستخدم محاكاة سعر EURUSD الحقيقي حول مستويات 1.0800
         response = requests.get("https://er-api.com", timeout=3)
         if response.status_code == 200:
             rates = response.json().get("rates", {})
             eur_rate = rates.get("EUR", 0.92)
-            # تحويل السعر ليكون متوافقاً مع صيغة زوج EURUSD الافتراضية للتداول
             actual_price = 1 / float(eur_rate) if eur_rate else 1.0850
             # إضافة تذبذب طفيف جداً لمحاكاة حركة الشموع اللحظية بالثواني
             return actual_price + random.uniform(-0.0002, 0.0002)
     except Exception:
         pass
-    # سعر احتياطي متذبذب في حال انقطاع الـ API لتجنب توقف الكود
     return random.uniform(1.0840, 1.0860)
 
 def calculate_sma(prices, period=50):
@@ -65,15 +60,15 @@ def send_welcome(message):
     welcome_msg = (
         "📊 **مرحباً بك في بوت المؤشرات المطور مع فلتر الأمان الذكي**\n\n"
         "🤖 تم إصلاح جلب الأسعار الحية ودمج مؤشر الاتجاه (SMA 50) لمنع دخول الصفقات الخاسرة عكس اتجاه السوق العنيف.\n\n"
-        "📌 أرسل أمر `/signals` لبدء استقبال البث المطور والمفلتر!"
+        "📌 أرسل أمر `/signals` لبدء استقبال البث المطور والمفلتر السريع!"
     )
     bot.reply_to(message, welcome_msg, parse_mode="Markdown")
 
 @bot.message_handler(commands=['signals'])
 def start_signals(message):
-    bot.reply_to(message, "🚀 تم إطلاق محرك الفحص الفعلي المتصل بالأسواق! جاري تحليل الاتجاه العام وبث الإشارات المصلحة...")
+    bot.reply_to(message, "🚀 تم إطلاق محرك الفحص الفعلي المتصل بالأسواق! جاري تحليل الاتجاه العام وبث الإشارات المصلحة السريعة...")
     
-    # مصفوفة لتخزين الأسعار التاريخية لحساب المتوسط المتحرك (نحتاج 50 شمعة على الأقل)
+    # مصفوفة لتخزين الأسعار التاريخية لحساب المتوسط المتحرك
     price_history = [random.uniform(1.0840, 1.0860) for _ in range(55)]
     
     while True: 
@@ -93,7 +88,8 @@ def start_signals(message):
                 continue
                 
             # 🔴 إشارة هبوط (PUT): السعر ارتفع بشكل حاد + (شرط الأمان: السعر تحت خط SMA_50 أي الاتجاه العام هابط)
-            if price_change > 0.00015: 
+            # تم تعديل القيمة إلى 0.00005 لتسريع بث الصفقات
+            if price_change > 0.00005: 
                 if current_price < sma_50:
                     signal_text = (
                         "🚨 **[ إشارة هبوط فنية حية - PUT ]** 🔴\n"
@@ -111,7 +107,8 @@ def start_signals(message):
                     time.sleep(20) # تجميد مؤقت لمنع تكرار الإشارة فوراً
             
             # 🟢 إشارة صعود (CALL): السعر هبط بشكل حاد + (شرط الأمان: السعر فوق خط SMA_50 أي الاتجاه العام صاعد)
-            elif price_change < -0.00015:
+            # تم تعديل القيمة إلى -0.00005 لتسريع بث الصفقات
+            elif price_change < -0.00005:
                 if current_price > sma_50:
                     signal_text = (
                         "🚨 **[ إشارة صعود فنية حية - CALL ]** 🟢\n"

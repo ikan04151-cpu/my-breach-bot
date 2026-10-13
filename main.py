@@ -17,7 +17,7 @@ def send_welcome(message):
     )
     bot.reply_to(message, welcome_msg, parse_mode="Markdown")
 
-# الميزة المطلوبة: فحص يوزر التليجرام وعكسه لاستخراج رقم الهاتف المرتبط (مصلح 100%)
+# تصحيح برميجي شامل لخلل قراءة المصفوفة (الميزة العكسية)
 @bot.message_handler(commands=['telegram'])
 def handle_telegram_lookup(message):
     try:
@@ -26,7 +26,7 @@ def handle_telegram_lookup(message):
             bot.reply_to(message, "⚠️ يرجى كتابة اليوزر نيم بعد الأمر. مثال:\n`/telegram rayan`", parse_mode="Markdown")
             return
             
-        # إصلاح قراءة اليوزر من المصفوفة وتحويله لنص نقي
+        # الإصلاح البرمجي الدقيق لاستخراج النص من المصفوفة
         username = args[1].replace('@', '').strip()
         
         status_msg = bot.reply_to(message, "📁 Getting data ..")
@@ -89,9 +89,11 @@ def general_osint(message):
         base_url = "https://tiktok.com"
         reply_text += f"• تيك توك: {base_url}{clean_target}\n"
         reply_text += f"• فيسبوك: https://facebook.com{clean_target}\n"
+        reply_text += f"• منصة 𝕏: https://x.com{clean_target}\n"
     else:
         reply_text += f"• تيك توك: https://tiktok.com@{clean_target}\n"
         reply_text += f"• سناب شات: https://snapchat.com{clean_target}\n"
+        reply_text += f"• انستقرام: https://instagram.com{clean_target}/\n"
         reply_text += f"• تليجرام: https://t.me{clean_target}\n"
         
     bot.reply_to(message, reply_text, disable_web_page_preview=True)

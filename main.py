@@ -3,11 +3,26 @@ import telebot
 import requests
 import time
 import random
+from threading import Thread
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
 ASSET = "EURUSD"
+
+# --- خادم وهمي لإجبار منصة Render على تفعيل البوت فوراً وحل مشكلة الـ Port ---
+class MyServer(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+        self.wfile.write(bytes("Bot is running perfectly!", "utf-8"))
+
+def run_web_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(("0.0.0.0", port), MyServer)
+    server.serve_forever()
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
@@ -28,10 +43,7 @@ def start_signals(message):
     
     while True: 
         try:
-            # المراقبة المتوافقة مع حركة الشموع السريعة ذات الـ 15 ثانية الخاصة بك
             time.sleep(15) 
-            
-            # فلترة وتحليل فني متقاطع للمؤشرات الثلاثة في شاشتك
             strategy_filter = random.choice(["CALL_CONFIRM", "PUT_CONFIRM", "MARKET_WAIT"])
             
             if strategy_filter == "CALL_CONFIRM":
@@ -67,4 +79,6 @@ def start_signals(message):
             continue
 
 if __name__ == "__main__":
+    # تشغيل الخادم الوهمي في الخلفية لإرضاء منصة Render فوراً
+    Thread(target=run_web_server, daemon=True).start()
     bot.infinity_polling()

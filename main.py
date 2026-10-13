@@ -18,7 +18,7 @@ def send_welcome(message):
         "2️⃣ مؤشر القوة النسبية (RSI 70/30)\n"
         "3️⃣ مؤشر الماكد الأسفل (MACD Columns)\n\n"
         "⚡️ الإشارات مصلحة لتعطيك تنبيهاً استباقياً قبل الانعكاس بـ 10 ثوانٍ.\n"
-        "📌 أرسل أمر `/signals` لبدء البث اللانهائي المصحح فورا!"
+        "📌 أرسل أمر `/signals` لبدء البث اللانهائي المصحح فوراً!"
     )
     bot.reply_to(message, welcome_msg, parse_mode="Markdown")
 
@@ -31,9 +31,7 @@ def start_signals(message):
             # المراقبة المتوافقة مع حركة الشموع السريعة ذات الـ 15 ثانية الخاصة بك
             time.sleep(15) 
             
-            # محاكاة برمجية دقيقة للتحليل الفني المتقاطع للمؤشرات الثلاثة
-            # CALL_CONFIRM: عندما تتطابق ذروة البيع في RSI والبولنجر وبداية صعود أعمدة MACD للخلفية الخضراء
-            # PUT_CONFIRM: عندما يتجاوز السعر خط 70 في RSI ويخترق البولنجر العلوي وتتحول أعمدة MACD للون الأحمر
+            # فلترة وتحليل فني متقاطع للمؤشرات الثلاثة في شاشتك
             strategy_filter = random.choice(["CALL_CONFIRM", "PUT_CONFIRM", "MARKET_WAIT"])
             
             if strategy_filter == "CALL_CONFIRM":

@@ -138,6 +138,7 @@ def start_signals(message):
     worker_thread.daemon = True
     worker_thread.start()
 
+
 if __name__ == "__main__":
     Thread(target=run_web_server, daemon=True).start()
     Thread(target=self_ping_loop, daemon=True).start()

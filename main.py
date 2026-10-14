@@ -11,7 +11,8 @@ logging.basicConfig(level=logging.INFO)
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 if not TELEGRAM_TOKEN:
-    TELEGRAM_TOKEN = "8626801856:AAEClRrIG6AyTClDrmbXsZWIUAobdUunT3Y"
+    TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+
 "
 
 # مصفوفة لتخزين معرفات شات المستخدمين لتلقي الإشارات تلقائياً
